@@ -7,14 +7,13 @@ local version_number = "1.0.0"
 local updated = false
 local github_ver_num = http.Get("https://raw.githubusercontent.com/GraterThumbleed/ThemeManager/main/version.txt")
 
-if version_number ~= github_ver_num then
+if version_number ~= string.gsub(github_ver_num, "\n", "") then
     updated = true
     local github_file = http.Get("https://raw.githubusercontent.com/GraterThumbleed/ThemeManager/main/ThemeManager.lua")
     local curren_file = file.Open(GetScriptName(), "w")
     curren_file:Write(github_file)
     curren_file:Close()
 end
-
 --------------------------------------------------------------------------------
 
 file.Open( "ThemeS/urlpresets.txt", "a"):Close()
