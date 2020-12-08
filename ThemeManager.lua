@@ -9,7 +9,7 @@ local github_ver_num = http.Get("https://raw.githubusercontent.com/GraterThumble
 
 if version_number ~= github_ver_num then
     updated = true
-    local github_file = http.Get("https://github.com/GraterThumbleed/ThemeManager/blob/main/ThemeManager.lua")
+    local github_file = http.Get("https://raw.githubusercontent.com/GraterThumbleed/ThemeManager/main/ThemeManager.lua")
     local curren_file = file.Open(GetScriptName(), "w")
     curren_file:Write(github_file)
     curren_file:Close()
