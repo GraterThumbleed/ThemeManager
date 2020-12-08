@@ -1,6 +1,8 @@
 
 -- I do use scape's presets I asked and he's fine with it
 -- Also the base64 is taken from https://stackoverflow.com/questions/34618946/lua-base64-encode
+-- If you use scape's import codes they are compatible with my system and vice versa :)
+
 ------------------------------------------------------------------------------- Auto Updater
 
 local version_number = "1.0.0"
@@ -68,7 +70,7 @@ end
 local function getSaved()
     files = {}
     file.Enumerate(function(name)
-        if string.match( name,"ThemeS/" ) then
+        if string.match( name,"ThemeS/" ) and not string.match( name,"urlpresets.txt" ) then
             name2 = string.gsub( name,"ThemeS/","" )
             table.insert( files, name2 )
         end
