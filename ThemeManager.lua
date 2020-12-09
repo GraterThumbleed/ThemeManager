@@ -5,7 +5,7 @@
 
 ------------------------------------------------------------------------------- Auto Updater
 local dont_update = false
-local version_number = "1.1.0"
+local version_number = "1.1.1"
 local updated = false
 local github_ver_num = http.Get("https://raw.githubusercontent.com/GraterThumbleed/ThemeManager/main/version.txt")
 
@@ -215,7 +215,7 @@ import:SetPosX(305) import:SetPosY(247+44)
 export:SetPosX(445) export:SetPosY(247+44)
 if updated then
     local updatetext = gui.Text( groupbox, "Updated Lua Reload Please" )
-    updatetext:SetPosY(300) updatetext:SetPosX(305)
+    updatetext:SetPosY(335) updatetext:SetPosX(305)
 end
 getSaved()
 listboxsaved:SetOptions(unpack(files))
