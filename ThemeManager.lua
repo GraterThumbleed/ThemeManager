@@ -4,12 +4,12 @@
 -- If you use scape's import codes they are compatible with my system and vice versa :)
 
 ------------------------------------------------------------------------------- Auto Updater
-
-local version_number = "1.0.0"
+local dont_update = false
+local version_number = "1.1.0"
 local updated = false
 local github_ver_num = http.Get("https://raw.githubusercontent.com/GraterThumbleed/ThemeManager/main/version.txt")
 
-if version_number ~= string.gsub(github_ver_num, "\n", "") then
+if version_number ~= string.gsub(github_ver_num, "\n", "") and not dont_update then
     updated = true
     local github_file = http.Get("https://raw.githubusercontent.com/GraterThumbleed/ThemeManager/main/ThemeManager.lua")
     local curren_file = file.Open(GetScriptName(), "w")
@@ -18,7 +18,10 @@ if version_number ~= string.gsub(github_ver_num, "\n", "") then
 end
 --------------------------------------------------------------------------------
 
-file.Open( "ThemeS/urlpresets.txt", "a"):Close()
+local urlpresetstextfile = file.Open( "ThemeS/urlpresets.txt", "a") urlpresetstextfile:Close()
+local undotextfile = file.Open( "ThemeS/undo.txt", "a") undotextfile:Close()
+local autoruntextfile = file.Open( "ThemeS/autorun.txt", "a") autoruntextfile:Close()
+local lastload = ""
 local b='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
 function enc(data)
     return ((data:gsub('.', function(x) 
@@ -70,7 +73,7 @@ end
 local function getSaved()
     files = {}
     file.Enumerate(function(name)
-        if string.match( name,"ThemeS/" ) and not string.match( name,"urlpresets.txt" ) then
+        if string.match( name,"ThemeS/" ) and not string.match( name,".txt" ) then
             name2 = string.gsub( name,"ThemeS/","" )
             table.insert( files, name2 )
         end
@@ -85,6 +88,24 @@ local function setTheme(themestring)
         if #linevars == 5 then
             gui.SetValue(linevars[1], linevars[2], linevars[3], linevars[4], linevars[5])
         end
+    end
+end
+local function undoChanges()
+    local path = ( "ThemeS/undo.txt" )
+    cfgfile = file.Open( path, "r" )
+    cfgread = cfgfile:Read()
+    cfgfile:Close()
+    setTheme(cfgread)
+end
+local function savev2()
+    local fullstring = ""
+    path = ("ThemeS/undo.txt")
+    for i=1,#completevars do
+        local r,g,b,a = gui.GetValue(completevars[i])
+        fullstring = fullstring..completevars[i].." "..r.." "..g.." "..b.." "..a.."\n"
+        cfgfile = file.Open( path, "w" )
+        cfgfile:Write(fullstring)
+        cfgfile:Close()
     end
 end
 local ref = gui.Reference("Settings")
@@ -116,11 +137,15 @@ local load = gui.Button( groupbox, "Load", function()
     cfgfile = file.Open( path, "r" )
     cfgread = cfgfile:Read()
     cfgfile:Close()
+    savev2()
     setTheme(cfgread)
+    lastload = "Saved"
 end)
 load:SetPosX(305) load:SetPosY(56)
 local loadpreset = gui.Button( groupbox, "Load Preset", function()
+    savev2()
     setTheme(dec(presetTable[listboxpresets:GetValue()+1][2]))
+    lastload = "Preset"
 end)
 loadpreset:SetPosX(445) loadpreset:SetPosY(56)
 local delete = gui.Button( groupbox, "Delete", function()
@@ -159,6 +184,21 @@ end)
 create:SetPosX(445) create:SetPosY(100)
 local refresh = gui.Button( groupbox, "Refresh", function() getSaved() listboxsaved:SetOptions(unpack(files)) end)
 refresh:SetPosX(305) refresh:SetPosY(144)
+local undochanges = gui.Button( groupbox, "Undo Changes", undoChanges)
+undochanges:SetPosX(445) undochanges:SetPosY(188)
+local autorun = gui.Button( groupbox, "Set as Auto-Run", function()
+    local autorunfile = file.Open( "ThemeS/autorun.txt", "w")
+    local string = lastload.." "..""
+    local fullstring = ""
+    for i=1,#completevars do
+        local r,g,b,a = gui.GetValue(completevars[i])
+        fullstring = fullstring..completevars[i].." "..r.." "..g.." "..b.." "..a.."\n"
+    end
+    encodedstring = enc(fullstring)
+    autorunfile:Write(encodedstring)
+    autorunfile:Close()
+end)
+autorun:SetPosX(305) autorun:SetPosY(188)
 local importcode = gui.Editbox( groupbox, "import", "Import code" )
 local import = gui.Button( groupbox, "Import Code", function() setTheme(dec(importcode:GetValue())) end)
 local export = gui.Button( groupbox, "Export Code", function()
@@ -171,11 +211,19 @@ local export = gui.Button( groupbox, "Export Code", function()
     print(encodedstring)
 end)
 importcode:SetWidth(267) importcode:SetPosX(305) 
-import:SetPosX(305) import:SetPosY(247)
-export:SetPosX(445) export:SetPosY(247)
+import:SetPosX(305) import:SetPosY(247+44)
+export:SetPosX(445) export:SetPosY(247+44)
 if updated then
     local updatetext = gui.Text( groupbox, "Updated Lua Reload Please" )
     updatetext:SetPosY(300) updatetext:SetPosX(305)
 end
 getSaved()
 listboxsaved:SetOptions(unpack(files))
+callbacks.Register( "Unload", function()
+    local x = file.Open( "ThemeS/undo.txt", "w")
+    x:Write("")
+    x:Close()
+end)
+local autorunfile2 = file.Open( "ThemeS/autorun.txt", "r")
+setTheme(dec(autorunfile2:Read()))
+autorunfile2:Close()
